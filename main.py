@@ -21,6 +21,21 @@ def sendMessage (chat_id, text, parse_mode, no_link_preview):
     print(response.status_code)
     return response
 
+def sendPhoto (chat_id, caption, parse_mode, photo_url, no_link_preview):
+    link='https://api.telegram.org/bot' + confidential.api_key + '/sendPhoto'
+    params = {
+                'chat_id': chat_id,
+                'caption': caption,
+                'parse_mode': parse_mode,
+                'photo': photo_url,
+                'disable_web_page_preview': no_link_preview,
+                #this is hardcoded
+                'disable_notification': False 
+            }
+    response = requests.post(link, json=params, timeout=2)
+    print(response.status_code)
+    return response
+
 def getUpdates ():
     #take out ?offset=-1 to receive all messages
     link = 'https://api.telegram.org/bot' + confidential.api_key + '/getUpdates?offset=-1'
@@ -28,19 +43,25 @@ def getUpdates ():
     print(response.status_code)
     return response
 
-def check_message (mes, id):
+def check_message (mes, id, username):
 
     print(mes)
     if (mes.find('/start')!=-1):
         sendMessage(id, 'use /register to register to updates', 'Markdown', True)
 
     elif (mes.find('/register')!=-1):
-        with open('mailing_list.txt', 'r+', encoding = 'utf-8') as file:
-            file.write(str(id) + '\n')
-        sendMessage(id, '**bot goes brrrr** you can go relax!', 'Markdown', True)
+
+        with open('mailing_list.txt', 'r+', encoding = 'utf-8') as ids, open('mailing_list_username.txt', 'r+', encoding = 'utf-8') as unames:
+
+            if (ids.read().find(str(id)) != -1):
+                sendMessage(id, 'You\'re already subscribed!', 'Markdown', True)
+            else:
+                ids.write(str(id) + '\n')
+                unames.write(str(username) + '\n')
+                sendMessage(id, 'You\'re now subscribed!', 'Markdown', True)
 
 def check_website_change ():
-
+    
     trigger = 0
     f = open("reference_page.html", "r" , encoding = 'utf-8')
     g = open("screenshot.png", "wb")
@@ -105,7 +126,7 @@ while True:
     counter = counter % 100
     response = getUpdates()
     a = json.loads(response.text)
-    print(json.dumps(a['result'], indent=4, sort_keys=True))
+    #print(json.dumps(a['result'], indent=4, sort_keys=True))
 
     text = a['result'][0]['message']['text']
     username = a['result'][0]['message']['chat']['username']
@@ -122,8 +143,14 @@ while True:
     #                               |___/               |___/ 
 
     if (counter==1):
-        check_website_change()
-
+        if (check_website_change()):
+            print('Something changed on ilpiemontetivaccina.it')
+            with open('mailing_list.txt','r') as mailz:
+                lines = mailz.readlines()
+                for i in lines:
+                    sendPhoto (i.rstrip(), 'Look, someting changed!', 'Markdown', 'https://imgur.com/a/lhqSGu9', True)
+        else:
+            print('Nothing changed on ilpiemontetivaccina.it')
     #   ___                                  
     #  / _ \                                 
     # / /_\ \_ __  _____      _____ _ __ ___ 
@@ -147,7 +174,5 @@ while True:
         print('Answering!')
         f.seek (0)
         f.write(str(message_id))
-        check_message(text, user_id)
+        check_message(text, user_id, username)
         sendMessage(confidential.id_privatechat, text, 'Markdown', True)
-
-
