@@ -1,11 +1,11 @@
 import requests
-from bs4 import BeautifulSoup
-from requests.api import get
 import confidential
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import json
-import time 
+import time
+from base64 import b64encode
+
 
 def sendMessage (chat_id, text, parse_mode, no_link_preview):
     link='https://api.telegram.org/bot' + confidential.api_key + '/sendMessage'
@@ -43,22 +43,46 @@ def getUpdates ():
     print(response.status_code)
     return response
 
+def upload_to_imgur (img_name):
+
+    headers = {"Authorization": "Client-ID " + confidential.imgur_id}
+
+    api_key = confidential.imgur_secret
+
+    url = "https://api.imgur.com/3/upload.json"
+
+    response = requests.post(
+        url, 
+        headers = headers,
+        data = {
+            'key': api_key, 
+            'image': b64encode(open(img_name, 'rb').read()),
+            'type': 'base64',
+            'name': 'iptv-screen.jpg',
+            'title': 'A screenshot'
+        }
+    )    
+
+    upres = json.loads(response.text)
+    return upres['data']['link']
+
 def check_message (mes, id, username):
 
+    #/start
     print(mes)
     if (mes.find('/start')!=-1):
-        sendMessage(id, 'use /register to register to updates', 'Markdown', True)
+        text = '🤖 @piemonte\_open\_vax\_bot by campa, il codice open source di questo bot è disponibile [qui](https://github.com/itscampa/piemonte_open_vax_bot/)\n\n✍️ Per iscriverti alle notifiche usa /subscribe\n\n💉 Ogni volta che saranno disponibili dei nuovi open day vaccinali ti manderò un messaggio'
+        sendMessage(id, text, 'Markdown', True)
 
-    elif (mes.find('/register')!=-1):
-
+    #/subscribe
+    elif (mes.find('/subscribe')!=-1):
         with open('mailing_list.txt', 'r+', encoding = 'utf-8') as ids, open('mailing_list_username.txt', 'r+', encoding = 'utf-8') as unames:
-
             if (ids.read().find(str(id)) != -1):
-                sendMessage(id, 'You\'re already subscribed!', 'Markdown', True)
+                sendMessage(id, 'Sei già iscritto alle notifiche! 😉', 'Markdown', True)
             else:
                 ids.write(str(id) + '\n')
                 unames.write(str(username) + '\n')
-                sendMessage(id, 'You\'re now subscribed!', 'Markdown', True)
+                sendMessage(id, 'D\'ora in poi riceverai i messaggi ✅', 'Markdown', True)
 
 def check_website_change ():
     
@@ -74,7 +98,7 @@ def check_website_change ():
 
     driver = webdriver.Chrome('./chromedriver',options=chrome_options)
 
-    print ('Checking webiste')
+    print ('Checking website')
     site_link = 'https://www.ilpiemontetivaccina.it/preadesione/#/'
     driver.get(site_link)
 
@@ -148,7 +172,7 @@ while True:
             with open('mailing_list.txt','r') as mailz:
                 lines = mailz.readlines()
                 for i in lines:
-                    sendPhoto (i.rstrip(), 'Look, someting changed!', 'Markdown', 'https://imgur.com/a/lhqSGu9', True)
+                    sendPhoto (i.rstrip(), '🚨 Hey! 🚨\nSembra ci siano novità su [ilpiemontetivaccina.it](https://www.ilpiemontetivaccina.it/preadesione/#/) 🌐', 'Markdown', upload_to_imgur('screenshot.png'), True)
         else:
             print('Nothing changed on ilpiemontetivaccina.it')
     #   ___                                  
@@ -175,4 +199,4 @@ while True:
         f.seek (0)
         f.write(str(message_id))
         check_message(text, user_id, username)
-        sendMessage(confidential.id_privatechat, text, 'Markdown', True)
+        #sendMessage(confidential.id_privatechat, text, 'Markdown', True)
