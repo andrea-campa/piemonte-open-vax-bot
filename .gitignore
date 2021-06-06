@@ -1,0 +1,6 @@
+# Ignore everything:
+*
+
+# Except for these directories:
+!.gitignore
+!main.py
