@@ -148,8 +148,8 @@ while True:
             username = a['result'][0]['message']['chat']['username']
             message_id = a['result'][0]['message']['message_id']
             user_id = a['result'][0]['message']['chat']['id']
-        except:
-            if (debug == 2): print('Someone messed up')
+        except Exception as e:
+            if (debug == 2): print(e)
             time.sleep(1)
             continue
 
@@ -200,3 +200,4 @@ while True:
 
     except Exception as e:
         sendMessage(confidential.id_privatechat, str(e), 'Markdown', True)
+        if (debug == 2): print(e)
