@@ -6,6 +6,7 @@ import json
 import time
 from base64 import b64encode
 
+debug = 0
 
 def sendMessage (chat_id, text, parse_mode, no_link_preview):
     link='https://api.telegram.org/bot' + confidential.api_key + '/sendMessage'
@@ -18,7 +19,7 @@ def sendMessage (chat_id, text, parse_mode, no_link_preview):
                 'disable_notification': False 
             }
     response = requests.post(link, json=params, timeout=2)
-    print(response.status_code)
+    if (debug): print(response.status_code)
     return response
 
 def sendPhoto (chat_id, caption, parse_mode, photo_url, no_link_preview):
@@ -33,14 +34,14 @@ def sendPhoto (chat_id, caption, parse_mode, photo_url, no_link_preview):
                 'disable_notification': False 
             }
     response = requests.post(link, json=params, timeout=2)
-    print(response.status_code)
+    if (debug): print(response.status_code)
     return response
 
 def getUpdates ():
     #take out ?offset=-1 to receive all messages
     link = 'https://api.telegram.org/bot' + confidential.api_key + '/getUpdates?offset=-1'
     response = requests.get(link, timeout=2)
-    print(response.status_code)
+    if (debug): print(response.status_code)
     return response
 
 def upload_to_imgur (img_name):
@@ -69,7 +70,7 @@ def upload_to_imgur (img_name):
 def check_message (mes, id, username):
 
     #/start
-    print(mes)
+    if (debug): print(mes)
     if (mes.find('/start')!=-1):
         text = '🤖 @piemonte\_open\_vax\_bot by campa, il codice open source di questo bot è disponibile [qui](https://github.com/itscampa/piemonte_open_vax_bot/)\n\n✍️ Per iscriverti alle notifiche usa /subscribe\n\n💉 Ogni volta che saranno disponibili dei nuovi open day vaccinali ti manderò un messaggio'
         sendMessage(id, text, 'Markdown', True)
@@ -98,7 +99,7 @@ def check_website_change ():
 
     driver = webdriver.Chrome('./chromedriver',options=chrome_options)
 
-    print ('Checking website')
+    if (debug): print ('Checking website')
     site_link = 'https://www.ilpiemontetivaccina.it/preadesione/#/'
     driver.get(site_link)
 
@@ -114,7 +115,7 @@ def check_website_change ():
         element.screenshot_as_png #to take the page to the rigth place
 
         #taking screenshot of "vday" section
-        print('Taking screenshot')
+        if (debug): print('Taking screenshot')
         driver.execute_script("document.getElementById('outdated').innerHTML = '';")
         time.sleep(4)
         element_png = element.screenshot_as_png
@@ -148,7 +149,7 @@ while True:
             message_id = a['result'][0]['message']['message_id']
             user_id = a['result'][0]['message']['chat']['id']
         except:
-            print('Someone messed up')
+            if (debug): print('Someone messed up')
             time.sleep(1)
             continue
 
@@ -163,13 +164,13 @@ while True:
 
         if (counter==1):
             if (check_website_change()):
-                print('Something changed on ilpiemontetivaccina.it')
+                if (debug): print('Something changed on ilpiemontetivaccina.it')
                 with open('mailing_list.txt','r') as mailz:
                     lines = mailz.readlines()
                     for i in lines:
                         sendPhoto (i.rstrip(), '🚨 Hey! 🚨\nSembra ci siano novità su [ilpiemontetivaccina.it](https://www.ilpiemontetivaccina.it/preadesione/#/)', 'Markdown', upload_to_imgur('screenshot.png'), True)
             else:
-                print('Nothing changed on ilpiemontetivaccina.it')
+                if (debug): print('Nothing changed on ilpiemontetivaccina.it')
         #   ___                                  
         #  / _ \                                 
         # / /_\ \_ __  _____      _____ _ __ ___ 
@@ -182,15 +183,15 @@ while True:
         
         #checking if last message has already been seen
         if (str(message_id) != history):
-            print('New Message')
+            if (debug): print('New Message')
             check = 1 
         else:
-            print('Same Message')
+            if (debug): print('Same Message')
             check = 0
 
         #answer if it's a new message
         if (check):
-            print('Answering!')
+            if (debug): print('Answering!')
             f.seek (0)
             f.truncate(0)
             f.write(str(message_id))
