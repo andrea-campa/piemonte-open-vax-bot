@@ -77,7 +77,7 @@ def check_message (mes, id, username):
 
     #/subscribe
     elif (mes.find('/subscribe')!=-1):
-        with open('mailing_list.txt', 'r+', encoding = 'utf-8') as ids, open('mailing_list_username.txt', 'r+', encoding = 'utf-8') as unames:
+        with open('mailing_list.txt', 'r+', encoding = 'utf-8') as ids, open('mailing_list_username.txt', 'a+', encoding = 'utf-8') as unames:
             if (ids.read().find(str(id)) != -1):
                 sendMessage(id, 'Sei già iscritto alle notifiche! 😉', 'Markdown', True)
             else:
