@@ -6,7 +6,7 @@ import json
 import time
 from base64 import b64encode
 
-debug = 0
+debug = 1
 
 def sendMessage (chat_id, text, parse_mode, no_link_preview):
     link='https://api.telegram.org/bot' + confidential.api_key + '/sendMessage'
@@ -72,7 +72,7 @@ def check_message (mes, id, username):
     #/start
     if (debug == 2): print(mes)
     if (mes.find('/start')!=-1):
-        text = '🤖 @piemonte\_open\_vax\_bot by campa, il codice open source di questo bot è disponibile [qui](https://github.com/itscampa/piemonte_open_vax_bot/)\n\n✍️ Per iscriverti alle notifiche usa /subscribe\n\n💉 Ogni volta che saranno disponibili dei nuovi open day vaccinali ti manderò un messaggio'
+        text = '🤖 @piemonte\_open\_vax\_bot by campa, il codice open source di questo bot è disponibile [qui](https://github.com/itscampa/piemonte-open-vax-bot/)\n\n✍️ Per iscriverti alle notifiche usa /subscribe\n\n💉 Ogni volta che saranno disponibili dei nuovi open day vaccinali ti manderò un messaggio'
         sendMessage(id, text, 'Markdown', True)
 
     #/subscribe
@@ -138,7 +138,7 @@ while True:
     try:
         time.sleep(0.5)
         counter = counter + 1
-        counter = counter % 100
+        counter = counter % 500
         response = getUpdates()
         a = json.loads(response.text)
         #print(json.dumps(a['result'], indent=4, sort_keys=True))
