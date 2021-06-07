@@ -9,8 +9,6 @@ You can use the *setup.sh script* in the directory or:
 
 - Install chromedriver
 
-- Install xvfb
-
 - You'll also need to create some blank files in the directory:
     - last_message_id.txt
     - confidential.py
