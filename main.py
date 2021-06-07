@@ -87,7 +87,7 @@ def check_message (mes, id, username):
 def check_website_change ():
     
     trigger = 0
-    f = open("reference_page.html", "r" , encoding = 'utf-8')
+    f = open("reference_page.html", "r+" , encoding = 'utf-8')
     g = open("screenshot.png", "wb")
     
     chrome_options = Options()
@@ -107,6 +107,9 @@ def check_website_change ():
 
     time.sleep(1)
     if (f.read() != html):
+        f.seek(0)
+        f.truncate(0)
+        f.write(html)
         trigger = 1
         element.screenshot_as_png #to take the page to the rigth place
 
@@ -123,80 +126,76 @@ def check_website_change ():
 
     return trigger
 
-    #html = soup.find('body').getText()
-
-    # if (html!=text):
-
-    #     #do things
-    #     print('Something changed!')
-    #     text = 'Something changed on the PineBook page you were watching \n[link here](' + product_link + ')'
-    #     response = sendMessage (confidential.id_privatechat, text, 'Markdown', True)
-    #     f.close()
-    #     return response
-
-    # else:
-    #     print('All the same :(')
-    #     f.close()
-    #     return 0
-
+#-------------------------------------------------------------------------------------------
+#MAIN
 
 f = open("last_message_id.txt", "r+" , encoding = 'utf-8')
 
 counter = 0
 
 while True:
-    time.sleep(0.5)
-    counter = counter + 1
-    counter = counter % 100
-    response = getUpdates()
-    a = json.loads(response.text)
-    #print(json.dumps(a['result'], indent=4, sort_keys=True))
+    try:
+        time.sleep(0.5)
+        counter = counter + 1
+        counter = counter % 100
+        response = getUpdates()
+        a = json.loads(response.text)
+        #print(json.dumps(a['result'], indent=4, sort_keys=True))
 
-    text = a['result'][0]['message']['text']
-    username = a['result'][0]['message']['chat']['username']
-    message_id = a['result'][0]['message']['message_id']
-    user_id = a['result'][0]['message']['chat']['id']
-    
-    # ______                                                  
-    # | ___ \                                                 
-    # | |_/ /   _ _ __   __ _ _ __  _   ___      ____ _ _   _ 
-    # |    / | | | '_ \ / _` | '_ \| | | \ \ /\ / / _` | | | |
-    # | |\ \ |_| | | | | (_| | | | | |_| |\ V  V / (_| | |_| |
-    # \_| \_\__,_|_| |_|\__,_|_| |_|\__, | \_/\_/ \__,_|\__, |
-    #                                __/ |               __/ |
-    #                               |___/               |___/ 
+        try:
+            text = a['result'][0]['message']['text']
+            username = a['result'][0]['message']['chat']['username']
+            message_id = a['result'][0]['message']['message_id']
+            user_id = a['result'][0]['message']['chat']['id']
+        except:
+            print('Someone messed up')
+            time.sleep(1)
+            continue
 
-    if (counter==1):
-        if (check_website_change()):
-            print('Something changed on ilpiemontetivaccina.it')
-            with open('mailing_list.txt','r') as mailz:
-                lines = mailz.readlines()
-                for i in lines:
-                    sendPhoto (i.rstrip(), '🚨 Hey! 🚨\nSembra ci siano novità su [ilpiemontetivaccina.it](https://www.ilpiemontetivaccina.it/preadesione/#/) 🌐', 'Markdown', upload_to_imgur('screenshot.png'), True)
-        else:
-            print('Nothing changed on ilpiemontetivaccina.it')
-    #   ___                                  
-    #  / _ \                                 
-    # / /_\ \_ __  _____      _____ _ __ ___ 
-    # |  _  | '_ \/ __\ \ /\ / / _ \ '__/ __|
-    # | | | | | | \__ \\ V  V /  __/ |  \__ \
-    # \_| |_/_| |_|___/ \_/\_/ \___|_|  |___/
-                                             
-    f.seek (0)
-    history=f.read()
-    
-    #checking if last message has already been seen
-    if (str(message_id) != history):
-        print('New Message')
-        check = 1 
-    else:
-        print('Same Message')
-        check = 0
+        # ______                                                  
+        # | ___ \                                                 
+        # | |_/ /   _ _ __   __ _ _ __  _   ___      ____ _ _   _ 
+        # |    / | | | '_ \ / _` | '_ \| | | \ \ /\ / / _` | | | |
+        # | |\ \ |_| | | | | (_| | | | | |_| |\ V  V / (_| | |_| |
+        # \_| \_\__,_|_| |_|\__,_|_| |_|\__, | \_/\_/ \__,_|\__, |
+        #                                __/ |               __/ |
+        #                               |___/               |___/ 
 
-    #answer if it's a new message
-    if (check):
-        print('Answering!')
+        if (counter==1):
+            if (check_website_change()):
+                print('Something changed on ilpiemontetivaccina.it')
+                with open('mailing_list.txt','r') as mailz:
+                    lines = mailz.readlines()
+                    for i in lines:
+                        sendPhoto (i.rstrip(), '🚨 Hey! 🚨\nSembra ci siano novità su [ilpiemontetivaccina.it](https://www.ilpiemontetivaccina.it/preadesione/#/)', 'Markdown', upload_to_imgur('screenshot.png'), True)
+            else:
+                print('Nothing changed on ilpiemontetivaccina.it')
+        #   ___                                  
+        #  / _ \                                 
+        # / /_\ \_ __  _____      _____ _ __ ___ 
+        # |  _  | '_ \/ __\ \ /\ / / _ \ '__/ __|
+        # | | | | | | \__ \\ V  V /  __/ |  \__ \
+        # \_| |_/_| |_|___/ \_/\_/ \___|_|  |___/
+                                                
         f.seek (0)
-        f.write(str(message_id))
-        check_message(text, user_id, username)
-        #sendMessage(confidential.id_privatechat, text, 'Markdown', True)
+        history=f.read()
+        
+        #checking if last message has already been seen
+        if (str(message_id) != history):
+            print('New Message')
+            check = 1 
+        else:
+            print('Same Message')
+            check = 0
+
+        #answer if it's a new message
+        if (check):
+            print('Answering!')
+            f.seek (0)
+            f.truncate(0)
+            f.write(str(message_id))
+            check_message(text, user_id, username)
+            #sendMessage(confidential.id_privatechat, text, 'Markdown', True)
+
+    except Exception as e:
+        sendMessage(confidential.id_privatechat, str(e), 'Markdown', True)
