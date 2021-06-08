@@ -8,3 +8,4 @@
 !requirements.txt
 !setup.sh
 !service.py
+!docker-compose.yml

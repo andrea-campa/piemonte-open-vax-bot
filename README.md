@@ -3,11 +3,13 @@ A telegram bot that sends a notification whenever a new COVID-2019 vaccines open
 
 ---
 ## Requirements
-You can use the *setup.sh script* in the directory or:
+You can use the **setup.sh script** in the directory or:
 
-- Install the python requirements with ``python3 -m pip install -r requirements.txt``
+- Install the python requirements with `python3 -m pip install -r requirements.txt` 
 
 - Install chromedriver
+
+- Setup the nginx docker container (`docker-compose up -d` in the main directory) to share the screenshots with telegram
 
 - You'll also need to create some blank files in the directory:
     - last_message_id.txt
