@@ -23,17 +23,19 @@ def sendMessage (chat_id, text, parse_mode, no_link_preview):
     return response
 
 def sendPhoto (chat_id, caption, parse_mode, photo_url, no_link_preview):
+    ip = requests.get('https://api.ipify.org').text
     link='https://api.telegram.org/bot' + confidential.api_key + '/sendPhoto'
     params = {
                 'chat_id': chat_id,
                 'caption': caption,
                 'parse_mode': parse_mode,
-                'photo': photo_url,
+                'photo': 'http://' + str(ip) + '/' + photo_url,
                 'disable_web_page_preview': no_link_preview,
                 #this is hardcoded
                 'disable_notification': False 
             }
     response = requests.post(link, json=params, timeout=2)
+    print(response.text)
     if (debug == 2): print(response.status_code)
     return response
 
@@ -44,28 +46,28 @@ def getUpdates ():
     if (debug == 2): print(response.status_code)
     return response
 
-def upload_to_imgur (img_name):
+# def upload_to_imgur (img_name):
 
-    headers = {"Authorization": "Client-ID " + confidential.imgur_id}
+#     headers = {"Authorization": "Client-ID " + confidential.imgur_id}
 
-    api_key = confidential.imgur_secret
+#     api_key = confidential.imgur_secret
 
-    url = "https://api.imgur.com/3/upload.json"
+#     url = "https://api.imgur.com/3/upload.json"
 
-    response = requests.post(
-        url, 
-        headers = headers,
-        data = {
-            'key': api_key, 
-            'image': b64encode(open(img_name, 'rb').read()),
-            'type': 'base64',
-            'name': 'iptv-screen.jpg',
-            'title': 'A screenshot'
-        }
-    )    
+#     response = requests.post(
+#         url, 
+#         headers = headers,
+#         data = {
+#             'key': api_key, 
+#             'image': b64encode(open(img_name, 'rb').read()),
+#             'type': 'base64',
+#             'name': 'iptv-screen.jpg',
+#             'title': 'A screenshot'
+#         }
+#     )    
 
-    upres = json.loads(response.text)
-    return upres['data']['link']
+#     upres = json.loads(response.text)
+#     return upres['data']['link']
 
 def check_message (mes, id, store):
 
@@ -94,7 +96,7 @@ def check_website_change ():
     
     trigger = 0
     f = open("reference_page.html", "r+" , encoding = 'utf-8')
-    g = open("screenshot.png", "wb")
+    g = open("./images/screenshot.png", "wb")
     
     chrome_options = Options()
     chrome_options.add_argument("--user-data-dir=chrome-data")
@@ -199,7 +201,7 @@ while True:
                 with open('mailing_list.txt','r') as mailz:
                     lines = mailz.readlines()
                     for i in lines:
-                        sendPhoto (i.rstrip(), '🚨 Hey! 🚨\nSembra ci siano novità su [ilpiemontetivaccina.it](https://www.ilpiemontetivaccina.it/preadesione/#/)', 'Markdown', upload_to_imgur('screenshot.png'), True)
+                        sendPhoto (i.rstrip(), '🚨 Hey! 🚨\nSembra ci siano novità su [ilpiemontetivaccina.it](https://www.ilpiemontetivaccina.it/preadesione/#/)', 'Markdown', 'screenshot.png', True)
             else:
                 if (debug == 3 or debug == 2 or debug == 1): print('Nothing changed on ilpiemontetivaccina.it')
         #   ___                                  
