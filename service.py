@@ -14,7 +14,7 @@ def sendMessage (chat_id, text, parse_mode, no_link_preview):
                 'disable_notification': False 
             }
     response = requests.post(link, json=params, timeout=2)
-    if (debug == 2): print(response.status_code)
+    if (debug == 2): print(str(chat_id) + ': status ' + str(response.status_code))
     return response
     
 
@@ -26,16 +26,19 @@ f = open("last_message_id.txt", "r+" , encoding = 'utf-8')
 counter = 0
 
 while True:
-    print('1. To send message to subscribers\n2. To exit')
+    print('\n1. To send message to subscribers\n2. To exit')
     select = input()
     if (select=='1'):
         print('Insert the update you want to send everyone')
         text = input()
         print('Insert the mailing list you want to use')
         mailing = input()
-        with open(str(mailing).rstrip(),'r') as mailz:
-            lines = mailz.readlines()
-            for i in lines:
-                sendMessage (i.rstrip(), '🔧 Update 🔧\n' + text, 'Markdown', True)
+        try:
+            with open(str(mailing).rstrip(),'r') as mailz:
+                lines = mailz.readlines()
+                for i in lines:
+                    sendMessage (i.rstrip(), '🔧 Update 🔧\n' + text, 'Markdown', True)
+        except FileNotFoundError:
+            print('Error: Insert valid filename')
     elif (select=='2'):
         exit()
